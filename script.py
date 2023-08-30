@@ -6,6 +6,10 @@ import openpyxl
 import csv
 
 
+finalContent = {}
+
+#push in finalContent a new entry
+
 def connect_database(environment="development"):
     """Connect to a MySQL database."""
 
@@ -46,29 +50,52 @@ def connect_database(environment="development"):
 def getAllIdPagesNews(connection):
     try:
         cursor = connection.cursor()
-        select = "SELECT tstamp FROM pages WHERE slug LIKE '%actualites%';"
+        select = "SELECT title, uid FROM pages WHERE slug LIKE '%actualites%';"
         cursor.execute(select)
         result = cursor.fetchall()
         for row in result:
-            # print(row[0])
-            getNewsContentByID(connection, row[0])
+            getNewsContentByID(connection, row)
+
+        print(finalContent)
     except mysql.connector.Error as error:
         print("Failed to get data from database {}".format(error))
 
 
-def getNewsContentByID(connection, id):
+def getNewsContentByID(connection, content):
     try:
+
+        title = content[0]
+        uid = content[1]
+
         cursor = connection.cursor()
-        select = f"SELECT history_data FROM sys_history WHERE tstamp = {id}"
+        select = f"SELECT bodytext FROM tt_content WHERE pid = {uid}"
         cursor.execute(select)
         results = cursor.fetchall()  # Récupérer tous les résultats
-        for result in results:
-            print(result[0], id)
+        finalDescription = []
+        for description in results:
+            #if description == None then pass
+            if description[0] == None:
+                pass
+            else:
+                finalDescription.append(description[0])
+        
+        if len(finalDescription) > 1:
+            #join all description in one string
+            finalDescription = " ".join(finalDescription)
+
+        finalContent[uid] = {
+            "title": title,
+            "description": finalDescription
+        }
+            
+
     except mysql.connector.Error as error:
         print("Failed to get data from database {}".format(error))
 
 connectDatabase = connect_database("development")
 getAllIdPagesNews(connectDatabase)
+
+
 
 
 
