@@ -1,0 +1,4 @@
+openpyxl
+mysql-connector-python ## CONNECT BDD
+beautifulsoup4 ## HTML PARSING
+requests ## GET DATA FROM URL
