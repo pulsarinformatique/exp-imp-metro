@@ -12,10 +12,10 @@ def connect_database(environment="development"):
     connection_config = {
         "development": {
             "host": "localhost",
-            "database": "local",
-            "user": "main",
-            "password": "main",
-            "port": 10043,
+            "database": "backend_layout",
+            "user": "root",
+            "password": "root",
+            "port": 8889,
         },
         "production": {
             "host": "database.example.com",
@@ -43,6 +43,39 @@ def connect_database(environment="development"):
 
 
 
+def getAllIdPagesNews(connection):
+    try:
+        cursor = connection.cursor()
+        select = "SELECT tstamp FROM pages WHERE slug LIKE '%actualites%';"
+        cursor.execute(select)
+        result = cursor.fetchall()
+        for row in result:
+            # print(row[0])
+            getNewsContentByID(connection, row[0])
+    except mysql.connector.Error as error:
+        print("Failed to get data from database {}".format(error))
+
+
+def getNewsContentByID(connection, id):
+    try:
+        cursor = connection.cursor()
+        select = f"SELECT history_data FROM sys_history WHERE tstamp = {id}"
+        cursor.execute(select)
+        results = cursor.fetchall()  # Récupérer tous les résultats
+        for result in results:
+            print(result[0], id)
+    except mysql.connector.Error as error:
+        print("Failed to get data from database {}".format(error))
+
+connectDatabase = connect_database("development")
+getAllIdPagesNews(connectDatabase)
+
+
+
+
+
+
+
 def readJsonFile():
     try:
         f = open('content.json')
@@ -64,15 +97,6 @@ def readJsonFileWithIndex():
     except mysql.connector.Error as error:
         print("Failed to read json file {}".format(error))
 
-def getAllPost(connection):
-    try:
-        cursor = connection.cursor()
-        select = "SELECT * FROM wp_posts"
-        cursor.execute(select)
-        result = cursor.fetchall()
-        return result
-    except mysql.connector.Error as error:
-        print("Failed to get data from database {}".format(error))
 
 
 def getPostById(connection, id):
@@ -141,4 +165,5 @@ def createPostWpPostAndReturnId(connection):
 
     
 
-connectDatabase = connectDatabase()
+connectDatabase = connect_database("development")
+
